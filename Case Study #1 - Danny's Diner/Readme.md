@@ -31,7 +31,7 @@ ORDER BY spending DESC;
 | C           | 36       |
 
 **Insight**
-- 
+- f
 
 ## Questions - 2
 **2. How many days has each customer visited the restaurant?**
@@ -56,4 +56,4 @@ ORDER BY customer_id ASC;
 | C           | 2       |
 
 **Insight**
-- 
+- f
