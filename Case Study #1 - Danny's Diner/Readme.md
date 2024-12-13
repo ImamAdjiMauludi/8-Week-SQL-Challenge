@@ -11,8 +11,7 @@ Danny ingin menggunakan data untuk menjawab beberapa pertanyaan sederhana tentan
 # Case Study Questions
 
 ## Questions - 1
-**1. What is the total amount each customer spent at the restaurant?**
-**1. Berapa jumlah total yang dibelanjakan setiap pelanggan di restoran?**
+**1. What is the total amount each customer spent at the restaurant?**/**1. Berapa jumlah total yang dibelanjakan setiap pelanggan di restoran?**
 
 **Query**
 ~~~~sql
@@ -40,8 +39,7 @@ ORDER BY spending DESC;
 - Customer C belanja sebanyak 36.
 
 ## Questions - 2
-**2. How many days has each customer visited the restaurant?**
-**2. Berapa hari setiap pelanggan mengunjungi restoran?**
+**2. How many days has each customer visited the restaurant?**/**2. Berapa hari setiap pelanggan mengunjungi restoran?**
 
 **Query**
 ~~~~sql
