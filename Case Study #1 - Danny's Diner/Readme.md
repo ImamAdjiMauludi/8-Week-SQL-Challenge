@@ -66,7 +66,7 @@ ORDER BY customer_id ASC;
 - Customer B paling sering datang yaitu 6x.
 - Customer C datang sebanyak 2x.
 
-  ## Questions - 3
+## Questions - 3
 **3. What was the first item from the menu purchased by each customer?**/**3. Apa item pertama dari menu yang dibeli oleh setiap pelanggan?**
 
 **Query**
@@ -106,3 +106,36 @@ WHERE rank = 1;
 - Menu pertama yang dipesan sustomer A adalah Curry dan Sushi.
 - Menu pertama yang dipesan sustomer B adalah Curry.
 - Menu pertama yang dipesan sustomer C adalah Ramen.
+
+## Questions - 4
+**4. What is the most purchased item on the menu and how many times was it purchased by all customers?**/**4. Apa item yang paling banyak dibeli pada menu dan berapa kali item tersebut dibeli oleh semua pelanggan?**
+
+**Query**
+~~~~sql
+SELECT
+	m.product_name,
+	COUNT(s.order_date) AS pesanan
+FROM
+	dannys_diner.sales AS s
+JOIN
+	dannys_diner.menu AS m
+ON
+	s.product_id = m.product_id
+GROUP BY
+	m.product_name
+ORDER BY
+	pesanan DESC
+LIMIT 1;
+~~~~
+**STEP**
+- **COUNT** kolom `orderdate` untuk megetahui jumlah pesanan.
+- **JOIN** tabel `sales` dengan `menu` pada kolom `product_id` untuk mengetahui nama menu.
+- Selanjutnya **GROUP BY** kolom `product_name` untuk mengetahui jumlah pesanan tiap menu.
+
+**Result**
+| product_name | pesanan |
+| ------------ | ------- |
+| ramen        | 8       |
+
+**Insight**
+- Menu yang paling banyak dipesan adalah Ramen, yaitu sebanyak 8x.
