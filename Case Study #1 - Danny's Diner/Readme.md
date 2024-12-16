@@ -54,7 +54,7 @@ ORDER BY customer_id ASC;
 - **SELECT** kolom `customer_id`, lalu gunakan **COUNT()** untuk menghitung `order_date` sebagai banyak kedatangan.
 - Perlu diperhatikan, kolom `order_date` menampilkan daftar pesanan bukan kedatagan, oleh sebab itu harus menggunakan **DISTINCT** agar tidak menghitung duplikat.
 
-**Answers**
+**Result**
 | customer_id | visited |
 | ----------- | ------- |
 | A           | 4       |
@@ -65,3 +65,44 @@ ORDER BY customer_id ASC;
 - Customer A datang sebanyak 4x.
 - Customer B paling sering datang yaitu 6x.
 - Customer C datang sebanyak 2x.
+
+  ## Questions - 3
+**3. What was the first item from the menu purchased by each customer?**/**3. Apa item pertama dari menu yang dibeli oleh setiap pelanggan?**
+
+**Query**
+~~~~sql
+WITH urutan AS 
+(
+SELECT
+	s.customer_id, 
+	s.order_date,
+    DENSE_RANK() OVER (PARTITION BY s.customer_id ORDER BY s.order_date) as rank,
+    m.product_name
+FROM dannys_diner.sales AS s
+JOIN dannys_diner.menu AS m
+ON s.product_id = m.product_id
+) 
+SELECT DISTINCT  
+	customer_id,
+	order_date,
+	product_name,
+	rank
+FROM urutan
+WHERE rank = 1;
+~~~~
+**STEP**
+- Membuat query CTE untuk mengetahui pembelian pertama menggunakan **DENSE_RANK** karena ada menu yang dipesan secara bersamaan di hari yang sama berdasarkan kolom `order_date`, lalu dikelompokkan **(PARTITION)** dengan kolom `customer_id`, sehingga dapat diketahui pembelian pertama tiap customer.
+- Selanjutnya menggunakan klausa **WHERE rank = 1** untuk mengetahui menu pertama yang dibeli oleh customer. Karena ada customer yang membeli 2 menu yang sama pada pesanan pertama kali, maka digunakan klausa **DISTINCT** untuk mengambil nilai yang unik.
+
+**Result**
+| customer_id | order_date | product_name | rank |
+| ----------- | ---------- | ------------ | ---- |
+| A           | 2021-01-01 | curry        | 1    |
+| A           | 2021-01-01 | sushi        | 1    |
+| B           | 2021-01-01 | curry        | 1    |
+| C           | 2021-01-01 | ramen        | 1    |
+
+**Insight**
+- Menu pertama yang dipesan sustomer A adalah Curry dan Sushi.
+- Menu pertama yang dipesan sustomer B adalah Curry.
+- Menu pertama yang dipesan sustomer C adalah Ramen.
