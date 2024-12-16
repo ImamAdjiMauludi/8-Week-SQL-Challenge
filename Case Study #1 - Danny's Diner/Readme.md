@@ -139,3 +139,108 @@ LIMIT 1;
 
 **Insight**
 - Menu yang paling banyak dipesan adalah Ramen, yaitu sebanyak 8x.
+
+## Questions - 5
+**5. Which item was the most popular for each customer?**/**5. Item mana yang paling populer bagi setiap pelanggan?**
+
+**Query**
+~~~~sql
+WITH fav_menu AS (
+SELECT
+	s.customer_id,
+	m.product_name,
+	COUNT(s.order_date) AS pesanan,
+	DENSE_RANK() OVER(PARTITION BY s.customer_id ORDER BY COUNT(s.order_date) DESC) AS rank_pesanan
+FROM
+	dannys_diner.sales AS s
+JOIN
+	dannys_diner.menu AS m
+ON
+	s.product_id = m.product_id
+GROUP BY
+	s.customer_id, m.product_name
+ORDER BY
+	pesanan DESC
+)
+SELECT
+	customer_id, 
+	product_name, 
+	pesanan,
+	rank_pesanan
+FROM
+	fav_menu
+WHERE
+	rank_pesanan = 1;
+~~~~
+**STEP**
+- 
+
+**Result**
+| customer_id | product_name | pesanan | rank_pesanan |
+| ----------- | ------------ | ------- | ------------ |
+| C           | ramen        | 3       | 1            |
+| A           | ramen        | 3       | 1            |
+| B           | curry        | 2       | 1            |
+| B           | sushi        | 2       | 1            |
+| B           | ramen        | 2       | 1            |
+
+**Insight**
+- 
+
+## Questions - 6
+**6. Which item was purchased first by the customer after they became a member?**/**6. Item apa yang pertama kali dibeli oleh pelanggan setelah menjadi member?**
+
+**Query**
+~~~~sql
+WITH cari_rank AS (
+WITH data_join AS (
+SELECT
+	s.customer_id,
+	s.order_date,
+	mem.join_date,
+    CASE
+    	WHEN s.order_date >= mem.join_date THEN 'Sudah Join'
+        ELSE 'Belum Join'
+    END AS status_join,
+	m.product_name
+FROM
+	dannys_diner.sales AS s
+JOIN
+	dannys_diner.members AS mem
+ON
+	s.customer_id = mem.customer_id
+JOIN
+	dannys_diner.menu AS m
+ON
+	s.product_id = m.product_id
+)
+SELECT
+	customer_id,
+	order_date,
+	join_date,
+   	status_join,
+	product_name,
+	DENSE_RANK() OVER(PARTITION BY customer_id ORDER BY order_date) AS pesanan_setelah_member
+FROM
+	data_join
+WHERE
+	status_join = 'Sudah Join'
+)
+SELECT
+	*
+FROM
+	cari_rank
+WHERE
+	pesanan_setelah_member = 1;
+~~~~
+**STEP**
+- 
+
+**Result**
+| customer_id | order_date | join_date  | status_join | product_name | pesanan_setelah_member |
+| ----------- | ---------- | ---------- | ----------- | ------------ | ---------------------- |
+| A           | 2021-01-07 | 2021-01-07 | Sudah Join  | curry        | 1                      |
+| B           | 2021-01-11 | 2021-01-09 | Sudah Join  | sushi        | 1                      |
+
+**Insight**
+-
