@@ -215,11 +215,7 @@ ON
 	s.product_id = m.product_id
 )
 SELECT
-	customer_id,
-	order_date,
-	join_date,
-   	status_join,
-	product_name,
+	*,
 	DENSE_RANK() OVER(PARTITION BY customer_id ORDER BY order_date) AS pesanan_setelah_member
 FROM
 	data_join
