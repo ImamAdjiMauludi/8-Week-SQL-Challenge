@@ -287,3 +287,59 @@ WHERE
 
 **Insight**
 -
+
+## Questions - 8
+**8. What is the total items and amount spent for each member before they became a member?**/**8. Berapa total barang dan jumlah yang dibelanjakan setiap anggota sebelum menjadi anggota?**
+
+**Query**
+~~~~sql
+WITH spending_sebelum_join AS (
+SELECT
+	s.customer_id,
+	COUNT(
+      	CASE
+      		WHEN m.product_name = 'sushi' THEN 1
+      		WHEN m.product_name = 'curry' THEN 1
+      		WHEN m.product_name = 'ramen' THEN 1
+	ELSE 1
+    	END) AS total_product,
+    SUM(m.price) AS total_spending
+FROM
+	dannys_diner.sales AS s
+FULL JOIN
+	dannys_diner.members AS mem
+ON
+	s.customer_id = mem.customer_id
+FULL JOIN
+	dannys_diner.menu AS m
+ON
+	s.product_id = m.product_id
+WHERE
+ 	s.order_date < mem.join_date
+    OR
+    mem.join_date IS NULL
+GROUP BY 
+	s.customer_id
+)
+SELECT
+	customer_id,
+   	total_product,
+    SUM(total_spending)
+FROM
+	spending_sebelum_join
+GROUP BY
+	customer_id,
+    total_product;
+~~~~
+**STEP**
+- 
+
+**Result**
+| customer_id | total_product | sum |
+| ----------- | ------------- | --- |
+| A           | 2             | 25  |
+| B           | 3             | 40  |
+| C           | 3             | 36  |
+
+**Insight**
+-
