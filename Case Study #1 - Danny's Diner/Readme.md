@@ -242,7 +242,7 @@ WHERE
 -
 
 ## Questions - 7
-**7. Which item was purchased just before the customer became a member?**/**7. Item apa yang dibeli sebelum pelanggan menjadi member?**
+**7. Which item was purchased just before the customer became a member?**/**7. Item apa yang dibeli sebelum customer menjadi member?**
 
 **Query**
 ~~~~sql
@@ -289,7 +289,7 @@ WHERE
 -
 
 ## Questions - 8
-**8. What is the total items and amount spent for each member before they became a member?**/**8. Berapa total barang dan jumlah yang dibelanjakan setiap anggota sebelum menjadi anggota?**
+**8. What is the total items and amount spent for each member before they became a member?**/**8. Berapa total item dan jumlah yang dibelanjakan setiap customer sebelum menjadi member?**
 
 **Query**
 ~~~~sql
@@ -324,7 +324,7 @@ GROUP BY
 SELECT
 	customer_id,
    	total_product,
-    SUM(total_spending)
+    SUM(total_spending) AS total_belanja
 FROM
 	spending_sebelum_join
 GROUP BY
@@ -335,11 +335,76 @@ GROUP BY
 - 
 
 **Result**
-| customer_id | total_product | sum |
-| ----------- | ------------- | --- |
-| A           | 2             | 25  |
-| B           | 3             | 40  |
-| C           | 3             | 36  |
+| customer_id | total_product | total_belanja |
+| ----------- | ------------- | ------------- |
+| A           | 2             | 25            |
+| B           | 3             | 40            |
+| C           | 3             | 36            |
+
+**Insight**
+-
+
+## Questions - 9
+**9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?**/**9. Jika setiap $1 yang dibelanjakan setara dengan 10 poin dan sushi memiliki pengali poin 2x - berapa banyak poin yang akan dimiliki setiap pelanggan?**
+
+**Query**
+~~~~sql
+WITH count_point AS (
+SELECT
+    s.customer_id,
+    m.product_name,
+    m.price,
+    CASE
+    	WHEN product_name = 'sushi' THEN m.price*10*2
+    	ELSE m.price*10
+    END AS point
+FROM
+	dannys_diner.sales AS s
+FULL JOIN
+	dannys_diner.members AS mem
+ON
+	s.customer_id = mem.customer_id
+FULL JOIN
+	dannys_diner.menu AS m
+ON
+	s.product_id = m.product_id
+)
+SELECT
+	customer_id,
+    SUM(point) AS total_point
+FROM
+	count_point
+GROUP BY
+	1
+ORDER BY
+	2 DESC;
+~~~~
+**STEP**
+- 
+
+**Result**
+| customer_id | total_point |
+| ----------- | ----------- |
+| B           | 940         |
+| A           | 860         |
+| C           | 360         |
+
+**Insight**
+-
+
+## Questions - 10
+**10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?**/**10. Pada minggu pertama setelah customer bergabung dengan program (termasuk tanggal bergabungnya), mereka memperoleh 2x poin untuk semua item, tidak hanya sushi - berapa banyak poin yang dimiliki pelanggan A dan B pada akhir Januari?**
+
+**Query**
+~~~~sql
+SELECT * FROM ..
+
+~~~~
+**STEP**
+- 
+
+**Result**
+
 
 **Insight**
 -
