@@ -240,3 +240,50 @@ WHERE
 
 **Insight**
 -
+
+## Questions - 7
+**7. Which item was purchased just before the customer became a member?**/**7. Item apa yang dibeli sebelum pelanggan menjadi member?**
+
+**Query**
+~~~~sql
+SELECT
+	*
+FROM (
+SELECT
+	s.customer_id,
+	s.order_date,
+	mem.join_date,
+    CASE
+    	WHEN s.order_date >= mem.join_date THEN 'Sudah Join'
+        ELSE 'Belum Join'
+    END AS status_join,
+	m.product_name,
+  	DENSE_RANK() OVER(PARTITION BY s.customer_id ORDER BY s.order_date DESC) AS rank_pesanan
+FROM
+	dannys_diner.sales AS s
+JOIN
+	dannys_diner.members AS mem
+ON
+	s.customer_id = mem.customer_id
+JOIN
+	dannys_diner.menu AS m
+ON
+	s.product_id = m.product_id
+WHERE
+  s.order_date < mem.join_date
+) AS data_belum_join
+WHERE 
+	rank_pesanan = 1;
+~~~~
+**STEP**
+- 
+
+**Result**
+| customer_id | order_date | join_date  | status_join | product_name | rank_pesanan |
+| ----------- | ---------- | ---------- | ----------- | ------------ | ------------ |
+| A           | 2021-01-01 | 2021-01-07 | Belum Join  | sushi        | 1            |
+| A           | 2021-01-01 | 2021-01-07 | Belum Join  | curry        | 1            |
+| B           | 2021-01-04 | 2021-01-09 | Belum Join  | sushi        | 1            |
+
+**Insight**
+-
