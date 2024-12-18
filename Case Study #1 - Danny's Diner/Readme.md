@@ -397,14 +397,53 @@ ORDER BY
 
 **Query**
 ~~~~sql
-SELECT * FROM ..
-
+WITH final_point AS (
+SELECT
+    s.customer_id,
+    m.product_name,
+    m.price,
+    s.order_date,
+    mem.join_date,
+    s.order_date - mem.join_date AS hari_setelah_jadi_member,
+    CASE
+    	WHEN s.order_date - mem.join_date <= 7 
+        AND s.order_date - mem.join_date >= 0 
+        THEN m.price*10*2
+    	ELSE m.price*10
+    END AS point
+FROM
+	dannys_diner.sales AS s
+FULL JOIN
+	dannys_diner.members AS mem
+ON
+	s.customer_id = mem.customer_id
+FULL JOIN
+	dannys_diner.menu AS m
+ON
+	s.product_id = m.product_id
+)
+SELECT
+	customer_id,
+    SUM(point) AS total_point_january
+FROM
+	final_point
+WHERE
+	order_date	< '2021-01-31'
+    AND
+	order_date >= join_date
+GROUP BY
+	customer_id
+ORDER BY
+	1;
 ~~~~
 **STEP**
 - 
 
 **Result**
-
+| customer_id | total_point_january |
+| ----------- | ------------------- |
+| A           | 1020                |
+| B           | 440                 |
 
 **Insight**
 -
