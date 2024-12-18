@@ -173,7 +173,8 @@ WHERE
 	rank_pesanan = 1;
 ~~~~
 **STEP**
-- 
+- Menggunakan CTE untuk membuat tabel yang berisi **COUNT** total pesanan dan **DENSE_RANK** untuk mengetahui pesanan yang populer oleh tiap customer.
+- Lalu filter menggunakan `rank_pesanan = 1` untuk menampilkan rank 1 pesanan populer tiap customer.
 
 **Result**
 | customer_id | product_name | pesanan | rank_pesanan |
@@ -185,7 +186,9 @@ WHERE
 | B           | ramen        | 2       | 1            |
 
 **Insight**
-- 
+- Customer C memesan ramen sebanyak 3x, menempati posisi pertama pada menu yang sering dipesan.
+- Customer A memesan ramen sebanyak 3x juga, menempati posisi pertama pada menu yang sering dipesan.
+- Sementara itu, customer B memesan semua menu (sushi, curry, ramen) dengan jumlah yang sama rata yaitu 2x.
 
 ## Questions - 6
 **6. Which item was purchased first by the customer after they became a member?**/**6. Item apa yang pertama kali dibeli oleh pelanggan setelah menjadi member?**
@@ -230,7 +233,9 @@ WHERE
 	pesanan_setelah_member = 1;
 ~~~~
 **STEP**
-- 
+- Membuat tabel CTE dengan nama `data_join` untuk mengetahui status customer pada saat order dibuat, apakah sudah sudah menjadi member atau belum.
+- Untuk mengetaui hal tersebut, digunakan klausa **CASE WHEN** yang akan mengembalikan status 'Sudah Join' jika tanggal order_date >= join_date, dan mengembalikan nilai 'Belum Join' jika selain kondisi tersebut.
+- Lalu membungkus CTE `data_join` dengan CTE baru yaitu `cari_rank`. Dengan klausa **DENSE_RANK** untuk mengetahui rank urutan pesanan berdasarkan kolom 'join_date'. Lalu memfilter kolom `status_join = 'Sudah Join'`
 
 **Result**
 | customer_id | order_date | join_date  | status_join | product_name | pesanan_setelah_member |
@@ -239,7 +244,8 @@ WHERE
 | B           | 2021-01-11 | 2021-01-09 | Sudah Join  | sushi        | 1                      |
 
 **Insight**
--
+- Pesanan yang dipesan pertama kali oleh customer A setelah menjadi member adalah Curry.
+- Pesanan yang dipesan pertama kali oleh customer B setelah menjadi member adalah Sushi.
 
 ## Questions - 7
 **7. Which item was purchased just before the customer became a member?**/**7. Item apa yang dibeli sebelum customer menjadi member?**
@@ -276,7 +282,10 @@ WHERE
 	rank_pesanan = 1;
 ~~~~
 **STEP**
-- 
+- Soal ini bisa diselesaikan dengan kueri yang hampir sama pada soal nomor 6, namun kueri yang dibuat pada nomor 6 kurang efektif. Mari buat kueri baru.
+- Di sini alih-alih menggunakan CTE, yang digunakan adalah subquery, alhasil lebih ringkas.
+- Hanya perlu memfilter kondisi `s.order_date < mem.join_date`, lalu pada queri utama difilter kembali dengan `rank_pesanan = 1` agar menampilkan pesanan terakhir 
+ persis sebelum bergabung member.
 
 **Result**
 | customer_id | order_date | join_date  | status_join | product_name | rank_pesanan |
@@ -286,7 +295,8 @@ WHERE
 | B           | 2021-01-04 | 2021-01-09 | Belum Join  | sushi        | 1            |
 
 **Insight**
--
+- Customer A memesan sushi dan curry, sebelum akhirnya bergabung member.
+- Customer B memesan sushi dan curry, sebelum akhirnya bergabung member.
 
 ## Questions - 8
 **8. What is the total items and amount spent for each member before they became a member?**/**8. Berapa total item dan jumlah yang dibelanjakan setiap customer sebelum menjadi member?**
@@ -316,8 +326,8 @@ ON
 	s.product_id = m.product_id
 WHERE
  	s.order_date < mem.join_date
-    OR
-    mem.join_date IS NULL
+	OR
+	mem.join_date IS NULL
 GROUP BY 
 	s.customer_id
 )
@@ -332,7 +342,9 @@ GROUP BY
     total_product;
 ~~~~
 **STEP**
-- 
+- Membuat CTE `spending_sebelum_join` yang berfungsi menghitung total spending.
+- Filter dengan `s.order_date < mem.join_date` untuk mengetahui spending sebelum menjadi member.
+- Kueri selanjutnya menghitung total spending dengan **SUM**, lalu **GROUP BY** kolom selain kolom `total_belanja`.
 
 **Result**
 | customer_id | total_product | total_belanja |
@@ -342,10 +354,12 @@ GROUP BY
 | C           | 3             | 36            |
 
 **Insight**
--
+- Customer A memesan 2 produk dengan total belanja $25.
+- Customer B memesan 3 produk dengan total belanja $40.
+- Customer C memesan 3 produk dengan total belanja $36.
 
 ## Questions - 9
-**9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?**/**9. Jika setiap $1 yang dibelanjakan setara dengan 10 poin dan sushi memiliki pengali poin 2x - berapa banyak poin yang akan dimiliki setiap pelanggan?**
+**9. If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?**/**9. Jika setiap $1 yang dibelanjakan setara dengan 10 poin dan sushi memiliki pengali poin 2x - berapa banyak poin yang akan dimiliki setiap pelanggan?**
 
 **Query**
 ~~~~sql
@@ -380,7 +394,7 @@ ORDER BY
 	2 DESC;
 ~~~~
 **STEP**
-- 
+- Membuat tabel CTE yang menggunakan **CASE WHEN**: 1. Ketika `product_name = 'sushi' THEN m.price*10*2` karena khusus pada produk sushi ada 2x points multiplier, selain itu hanya mengembalikan nilai dari `m.price*10`
 
 **Result**
 | customer_id | total_point |
@@ -390,7 +404,9 @@ ORDER BY
 | C           | 360         |
 
 **Insight**
--
+- Customer B memiliki point paling banyak yaitu 940 poin.
+- Customer A memiliki point sebanyak yaitu 860 poin.
+- Customer C memiliki point sebanyak yaitu 360 poin.
 
 ## Questions - 10
 **10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?**/**10. Pada minggu pertama setelah customer bergabung dengan program (termasuk tanggal bergabungnya), mereka memperoleh 2x poin untuk semua item, tidak hanya sushi - berapa banyak poin yang dimiliki pelanggan A dan B pada akhir Januari?**
@@ -437,7 +453,9 @@ ORDER BY
 	1;
 ~~~~
 **STEP**
-- 
+- Pada CTE `final_point`, berisi kueri untuk menghitung order date dengan klausa **CASE WHEN** ketika `s.order_date - mem.join_date <= 7` (7 disini adalah hari) dan `s.order_date - mem.join_date >= 0` (0 hari, hari ketika menjadi member) maka akan menghitung point yang dikali 2x, selain itu akan menjadi point biasa.
+- Namun perlu diperhatikan bahwa catatan transaksi ini tidak hanya dalam bulan Januari, tetapi ada 1 transaksi juga oleh customer B pada bulan Febuari.
+- Maka perlu difilter menggunakan `order_date	< '2021-01-31'`, serta `order_date >= join_date` untuk hanya menampilkan ketika customer sudah menjadi member.
 
 **Result**
 | customer_id | total_point_january |
@@ -446,4 +464,5 @@ ORDER BY
 | B           | 440                 |
 
 **Insight**
--
+- Pada bulan Januari, customer A memiliki point paling banyak yaitu 1020.
+- Lalu customer B memiliki point 440.
