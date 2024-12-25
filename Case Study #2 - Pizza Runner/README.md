@@ -28,12 +28,24 @@ Namun, sebelum Anda mulai menulis kueri SQL Anda, Anda mungkin ingin menyelidiki
 
 **Query**
 ~~~~sql
-CREATE TEMPORARY TABLE temp_customer_orders AS 
-SELECT * FROM customer_orders co;
+-- 1. Create temp table for customer_orders
+CREATE TABLE temp_customer_orders (
+	order_id INT,
+	customer_id INT,
+	pizza_id VARCHAR,
+	exclusions VARCHAR,
+	extras VARCHAR,
+	order_time TIMESTAMP
+);
+
+INSERT INTO temp_customer_orders
+SELECT *
+FROM customer_orders;
 
 SELECT *
 FROM temp_customer_orders tco;
 
+--- Replace null or blank to 0
 UPDATE temp_customer_orders 
 SET exclusions = 0
 WHERE exclusions = "null" OR exclusions = "" OR exclusions IS NULL;
