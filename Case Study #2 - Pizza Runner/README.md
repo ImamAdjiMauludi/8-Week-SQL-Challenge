@@ -467,3 +467,207 @@ ORDER BY 2 DESC;
 
 **Insight**
 - Insight goes here
+
+# Case Study Questions - B. Runner and Customer Experience
+
+## Questions - 1
+**1. How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)**
+
+**Query**
+~~~~sql
+SELECT 
+	strftime('%W', registration_date) + 1 AS week_period,
+	COUNT(runner_id) AS runner_signed_up
+FROM runners r
+GROUP BY 1;
+~~~~
+**STEP**
+- steps goes here
+
+**Result**
+|week_period|runner_signed_up|
+|-----------|----------------|
+|1|2|
+|2|1|
+|3|1|
+
+**Insight**
+- Insight goes here
+
+## Questions - 2
+**2. What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pickup the order?**
+
+**Query**
+~~~~sql
+SELECT 
+	tro.runner_id,
+	ROUND(AVG(CAST((strftime("%s", tro.pickup_time) - strftime("%s", tco.order_time)) AS FLOAT)/60),2) AS avg_pickup_duration
+FROM temp_runner_orders tro
+INNER JOIN temp_customer_orders tco 
+ON tro.order_id = tco.order_id
+WHERE tro.pickup_time IS NOT NULL
+GROUP BY 1;
+~~~~
+**STEP**
+- steps goes here
+
+**Result**
+|runner_id|avg_pickup_duration|
+|---------|-------------------|
+|1|15.68|
+|2|23.72|
+|3|10.47|
+
+**Insight**
+- Insight goes here
+
+## Questions - 3
+**3. Is there any relationship between the number of pizzas and how long the order takes to prepare?**
+
+**Query**
+~~~~sql
+SELECT 
+	tco.order_id,
+	COUNT(tco.pizza_id),
+	ROUND(CAST((strftime("%s", tro.pickup_time) - strftime("%s", tco.order_time)) AS FLOAT)/60,2) AS avg_pickup_duration
+FROM temp_runner_orders tro
+INNER JOIN temp_customer_orders tco 
+ON tro.order_id = tco.order_id
+WHERE tro.pickup_time IS NOT NULL
+GROUP BY 1
+ORDER BY 3 DESC;
+~~~~
+**STEP**
+- steps goes here
+
+**Result**
+|order_id|COUNT(tco.pizza_id)|avg_pickup_duration|
+|--------|-------------------|-------------------|
+|4|3|29.28|
+|3|2|21.23|
+|8|1|20.48|
+|10|2|15.52|
+|1|1|10.53|
+|5|1|10.47|
+|7|1|10.27|
+|2|1|10.03|
+
+**Insight**
+- Insight goes here
+
+## Questions - 4
+**4. What was the average distance travelled for each customer?**
+
+**Query**
+~~~~sql
+SELECT
+	tco.customer_id, 
+	ROUND(AVG(tro.distance),2) AS km_avg_distance
+FROM temp_runner_orders tro
+JOIN temp_customer_orders tco 
+ON tro.order_id = tco.order_id
+WHERE tro.pickup_time IS NOT NULL
+GROUP BY 1;
+~~~~
+**STEP**
+- steps goes here
+
+**Result**
+|customer_id|km_avg_distance|
+|-----------|---------------|
+|101|20.0|
+|102|16.73|
+|103|23.4|
+|104|10.0|
+|105|25.0|
+
+**Insight**
+- Insight goes here
+
+## Questions - 5
+**5. What was the difference between the longest and shortest delivery times for all orders?**
+
+**Query**
+~~~~sql
+SELECT
+	MAX(duration) AS longest_duration,
+	MIN(duration) AS shortest_duration
+FROM temp_runner_orders tro
+WHERE tro.pickup_time IS NOT NULL;
+~~~~
+**STEP**
+- steps goes here
+
+**Result**
+|longest_duration|shortest_duration|
+|----------------|-----------------|
+|40|10|
+
+**Insight**
+- Insight goes here
+
+## Questions - 6
+**6. What was the average speed for each runner for each delivery and do you notice any trend for these values?**
+
+**Query**
+~~~~sql
+SELECT
+	runner_id,
+	order_id,
+	distance,
+	ROUND(AVG(CAST(distance AS FLOAT)/(CAST(duration AS FLOAT)/60)),2) AS avg_speed_kmph
+FROM temp_runner_orders tro
+WHERE pickup_time IS NOT NULL
+GROUP BY 2
+ORDER BY 1;
+~~~~
+**STEP**
+- steps goes here
+
+**Result**
+|runner_id|order_id|distance|avg_speed_kmph|
+|---------|--------|--------|--------------|
+|1|1|20|37.5|
+|1|2|20|44.44|
+|1|3|13.4|40.2|
+|1|10|10|60.0|
+|2|4|23.4|35.1|
+|2|7|25|60.0|
+|2|8|23.4|93.6|
+|3|5|10|40.0|
+
+**Insight**
+- Insight goes here
+
+## Questions - 7
+**7. What is the successful delivery percentage for each runner?**
+
+**Query**
+~~~~sql
+WITH success_data AS (
+SELECT
+	runner_id,
+	CASE
+		WHEN cancellation = "Order Successfull" THEN 1
+		ELSE 0
+	END AS delivery_success
+FROM temp_runner_orders tro
+)
+SELECT 
+	runner_id,
+	CAST(SUM(delivery_success) AS FLOAT)/CAST(COUNT(delivery_success) AS FLOAT)*100 AS success_rate_percent
+FROM success_data
+GROUP BY runner_id;
+~~~~
+**STEP**
+- steps goes here
+
+**Result**
+|runner_id|success_rate_percent|
+|---------|--------------------|
+|1|100.0|
+|2|75.0|
+|3|50.0|
+
+**Insight**
+- Insight goes here
