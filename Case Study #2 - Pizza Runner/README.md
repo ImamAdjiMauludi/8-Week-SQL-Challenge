@@ -118,11 +118,6 @@ SELECT * FROM runner_orders ro;
 SELECT *
 FROM before_temp_runner_orders btro ;
 
---- Replace blank time to NULL
-UPDATE before_temp_runner_orders 
-SET pickup_time = NULL 
-WHERE pickup_time = "" OR pickup_time = "null";
-
 --- Delete 'km'
 UPDATE before_temp_runner_orders 
 SET distance = REPLACE(distance, "km","");
@@ -165,7 +160,11 @@ SELECT *
 FROM temp_runner_orders tro;
 ~~~~
 **STEP**
-- step goes here
+- Create temp table for runner_orders, also we want to change the datatype, but sqlite doesnt support direct change so create new table.
+- Mengganti `pickup_time` yang kosong dengan NULL (agar tidak ambigu jika diganti dengan 0).
+- Membersihkan `distance` agar hanya menampilkan angka saja.
+- Mengganti nilai NULL pada kolom `distance` dengan nilai 0.
+- Seletah itu buat tabel baru dengan masing-masing tipe data yang diinginkan, copy value ke tabel baru.
 
 **Result**\
 **Tabel `runner_orders` sebelum dibersihkan:**
@@ -197,7 +196,9 @@ FROM temp_runner_orders tro;
 |10|1|2020-01-11 18:50:20|10|10|Order Successfull|
 
 **Insight**
-- insight goes here
+- Kolom `pickup_time` yang kosong diganti dengan NULL agar tidak ambigu ketika dihitung.
+- Kolom `distance` yang NULL atau kosong diganti dengan 0.
+- Kolom `duration` diganti dengan 0.
 
 # Case Study Questions - A. Pizza Metrics
 
@@ -210,7 +211,7 @@ SELECT COUNT(DISTINCT order_id) AS total_order_pizza
 FROM temp_customer_orders tco;
 ~~~~
 **STEP**
-- steps goes here
+- Menghitung (**COUNT**) dengan **DISCTINCT** pada kolom `order_id`.
 
 **Result**
 |total_order_pizza|
@@ -218,7 +219,7 @@ FROM temp_customer_orders tco;
 |10|
 
 **Insight**
-- Insight goes here
+- Terdapat 10 order pizza (termasuk pesanan yang dibatalkan)
 
 ## Questions - 2
 **2. How many unique customer orders were made?**/**2. Berapa banyak pesanan unik pelanggan yang dibuat?**
@@ -229,15 +230,15 @@ SELECT COUNT(DISTINCT customer_id) AS unique_customer
 FROM temp_customer_orders tco;
 ~~~~
 **STEP**
-- steps goes here
-
+- Menghitung banyaknya value yang unik (dengan **DISTINCT**) pada kolom `customer_id`.
+  
 **Result**
 |unique_customer|
 |---------------|
 |5|
 
 **Insight**
-- Insight goes here
+- Diketahui terdapat 5 pelanggan.
 
 ## Questions - 3
 **3. How many successful orders were delivered by each runner?**/**3. Berapa banyak pesanan yang berhasil diantar oleh setiap pelari?**
@@ -250,7 +251,9 @@ WHERE pickup_time IS NOT 0
 GROUP BY 1;
 ~~~~
 **STEP**
-- steps goes here
+- Menghitung **DISTINCT** pada kolom `runner_id`, menghitung banyaknya data pada `pickup_time`.
+- Filter kondisi dengan `pickup_time` tidak sama dengan 0 (0 artinya order dibatalkan).
+- **GROUP BY 1** untuk mengetahui banyaknya order yang berhasil oleh tiap runner.
 
 **Result**
 |runner_id|successful_orders|
@@ -260,7 +263,9 @@ GROUP BY 1;
 |3|1|
 
 **Insight**
-- Insight goes here
+- Runner 1 berhasil mengantarkan 4 order.
+- Runner 3 berhasil mengantarkan 3 order.
+- Sementara itu, runner 3 hanya berhasil mengantarkan 1 order.
 
 ## Questions - 4
 **4. How many of each type of pizza was delivered?**/**4. Berapa banyak pizza dari setiap jenis yang diantar?**
@@ -275,7 +280,10 @@ WHERE tro.pickup_time IS NOT 0
 GROUP BY tco.pizza_id;
 ~~~~
 **STEP**
-- steps goes here
+- Menghitung (**COUNT**) kolom `pizza_id` pada tabel temp_customer_orders.
+- **FULL JOIN** (just in case..) dengan tabel `temp_runner_orders` untuk mengetahui jumlah order.
+- Filter kondisi dengan `pickup_time` tidak sama dengan 0 (0 artinya order dibatalkan).
+- **GROUP BY** `pizza_id` untuk mengetahui order tiap jenis pizza.
 
 **Result**
 |pizza_id|order_successful|
@@ -284,7 +292,8 @@ GROUP BY tco.pizza_id;
 |2|4|
 
 **Insight**
-- Insight goes here
+- Pizza 1 diorder sebanyak 10x.
+- Pizza 2 dioder sebanyak 4x.
 
 ## Questions - 5
 **5. How many Vegetarian and Meatlovers were ordered by each customer?**/**5. Berapa banyak Vegetarian dan Meatlovers yang dipesan oleh setiap pelanggan?**
@@ -302,7 +311,9 @@ WHERE tro.pickup_time IS NOT 0
 GROUP BY 1;
 ~~~~
 **STEP**
-- steps goes here
+- Menggunakan **CASE WHEN** pada kolom pizza_id ketika pizza 1 akan menggembalikan nilai 'Meatlovers' dan 2 untuk 'Vegetarian', lalu menghitung banyaknya data.
+- **FULL JOIN** denan tabel `customer_orders` untuk mengetahui jumlah order.
+- **GROUP BY** `customer_id` agar mengetahui jumlah order per customer.
 
 **Result**
 |customer_id|Meatlovers|Vegetarian|
@@ -314,7 +325,9 @@ GROUP BY 1;
 |105|0|1|
 
 **Insight**
-- Insight goes here
+- Customer 101 serta customer 102 memesan 2 Meatlover dan 1 Vegetarian.
+- Customer 104 memesan 3 Meatlover.
+- Customer 105 hanya memesan 1 yaitu Vegetarian.
 
 ## Questions - 6
 **6. What was the maximum number of pizzas delivered in a single order?**/**6. Berapa jumlah maksimum pizza yang diantar dalam satu pesanan?**
